@@ -10,15 +10,11 @@ fn tmpname(prefix: &OsStr, suffix: &OsStr, rand_len: usize) -> OsString {
     let mut buf = OsString::with_capacity(prefix.len() + suffix.len() + rand_len);
     buf.push(prefix);
 
-    // Push each character in one-by-one. Unfortunately, this is the only
-    // safe(ish) simple way to do this without allocating a temporary
-    // String/Vec.
-    unsafe {
-        rand::thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(rand_len)
-            .for_each(|b| buf.push(str::from_utf8_unchecked(&[b as u8])))
-    }
+    rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(rand_len)
+        .for_each(|b| buf.push(str::from_utf8(&[b as u8])
+                               .expect("Alphanumeric are all UTF-8")));
     buf.push(suffix);
     buf
 }
